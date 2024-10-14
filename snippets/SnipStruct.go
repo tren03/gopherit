@@ -1,5 +1,5 @@
 package snippets
 
-type Snip struct{
+type Snip struct {
 
 }

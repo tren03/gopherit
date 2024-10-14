@@ -1,0 +1,1 @@
+DO NOT ENTER THE .go suffix while creating a new file, it breaks the code for god knows what

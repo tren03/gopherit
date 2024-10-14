@@ -1,17 +1,17 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strings"
 
 	"github.com/tren03/gopherit/snippets"
 )
-
-func testhello() {
-	fmt.Println("hello world")
-}
 
 func main() {
 	func_map := make(map[string]int)
@@ -29,10 +29,67 @@ func main() {
 	}
 
 
+	str := ""
+	flag.StringVar(&str, "create", "", "create a snippet by providing its name")
+	flag.Parse()
+
+
+	if len(str) > 0 {
+
+		// prg not accepting names with .go suffix
+		if !strings.HasSuffix(str, ".go") {
+			str += ".go" // Add .go if not already present
+		}
+
+		boilerplate := fmt.Sprintf(`package snippets
+
+import "fmt"
+
+// This is the dynamically generated function for your snippet
+func (s Snip) %sMain() {
+    fmt.Println("Welcome to your snippet!")
+}
+        `,strings.TrimSuffix(str, ".go"))
+
+		snippetsDir := "./snippets"
+		path := filepath.Join(snippetsDir, str)
+
+		newFilePath := filepath.FromSlash(path)
+		log.Println("PATH TO NEW FILE ", newFilePath)
+		if _, err := os.Stat(newFilePath); err == nil {
+			log.Println("Snippet already exists, please choose a different name")
+		} else if os.IsNotExist(err) {
+			file, err := os.Create(newFilePath)
+			if err != nil {
+				fmt.Println("error creating new file ", err)
+				return
+			}
+			file.Write([]byte(boilerplate))
+			defer file.Close()
+			fmt.Printf("File created successfully at %s\n", newFilePath)
+			str += ".go"
+			cmd := exec.Command("nvim", newFilePath)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			if err != nil {
+				fmt.Println("error executing editor command ", err)
+			}
+
+		} else {
+			log.Printf("Error checking file: %v\n", err)
+			return
+		}
+		return
+
+	}
+
 	if len(os.Args) == 1 {
 		fmt.Println("Welcome to gopherit \nProvide the name of the snippet you want to run as the argument during cmd call")
 		return
 	}
+
 	args := os.Args
 	snip_to_run := strings.ToLower(args[1])
 
