@@ -2,7 +2,6 @@ package snippets
 
 import "fmt"
 
-func Snip1Main(){
-    fmt.Println("welcome to snippet1")
+func (s Snip) Snip1Main() {
+	fmt.Println("welcome to snippet1")
 }
-
