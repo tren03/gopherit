@@ -28,11 +28,9 @@ func main() {
 		//allsnipRef.Method(i).Call(nil)
 	}
 
-
 	str := ""
 	flag.StringVar(&str, "create", "", "create a snippet by providing its name")
 	flag.Parse()
-
 
 	if len(str) > 0 {
 
@@ -49,7 +47,7 @@ import "fmt"
 func (s Snip) %sMain() {
     fmt.Println("Welcome to your snippet!")
 }
-        `,strings.TrimSuffix(str, ".go"))
+        `, strings.TrimSuffix(str, ".go"))
 
 		snippetsDir := "./snippets"
 		path := filepath.Join(snippetsDir, str)
@@ -65,6 +63,9 @@ func (s Snip) %sMain() {
 				return
 			}
 			file.Write([]byte(boilerplate))
+			//	if err != nil {
+			//		log.Println("err creating boilerplate ", err)
+			//	}
 			defer file.Close()
 			fmt.Printf("File created successfully at %s\n", newFilePath)
 			str += ".go"
@@ -101,5 +102,4 @@ func (s Snip) %sMain() {
 
 	fmt.Printf("running snippet : %s\n", snip_to_run)
 	allsnipRef.Method(f_index).Call(nil)
-
 }

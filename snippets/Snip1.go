@@ -5,5 +5,5 @@ import (
 )
 
 func (s Snip) Snip1Main() {
-	fmt.Println("welcome to snippet1")
+	fmt.Println("welcome to sample snippet1")
 }
