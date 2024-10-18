@@ -8,18 +8,6 @@ import (
 
 // This is the dynamically generated function for your snippet
 func (s Snip) FzfpipeMain() {
-	//fmt.Println("Testing fzf pipe")
-	//lscmd := exec.Command("ls", "snippets/")
-	//items, err := lscmd.Output()
-	//// creating a array from output
-
-	//str_items := string(items)
-	//arr := []string{}
-	//temp := ""
-	//for ind,ch := range str_items{
-	//
-
-	//}
 	items := []string{"Option 1", "Option 2", "Option 3", "Option 4"}
 
 	// Create a command to run fzf

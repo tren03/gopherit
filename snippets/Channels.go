@@ -32,11 +32,10 @@ func (s Snip) ChannelsMain() {
 	go func() {
 		wg.Wait()
 		close(ch)
-        fmt.Println("closing channels")
+		fmt.Println("closing channels")
 	}()
 
 	for item := range ch {
 		fmt.Println(item)
 	}
-
 }
