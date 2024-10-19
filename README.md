@@ -16,11 +16,19 @@ Gopherit helps you streamline the process of storing, managing, and running Go c
     cd gopherit
 ```
 ### To create a snippet 
-You can give the snippet name with the .go extension or not, it works both ways.     
-PLEASE MAKE THE FIRST CHARCTER OF THE SNIPPET NAME CAPITAL, -> this is so that the function created can be exported out.      
+You can give the snippet name with the .go extension or not, it works both ways.         
 I have set this up to open neovim when the file created.
  ```bash
    go run main.go --create <snippet_name>
+```
+### To open a snippet
+I have set this up to open neovim on selection
+ ```bash
+   go run main.go --open
+```
+### To execute a snippet by searching for it via fzf
+ ```bash
+   go run main.go --run
 ```
 
 ### Executing a snippet
