@@ -8,15 +8,12 @@ import (
 	"strings"
 )
 
-func OpenSnipFunc() {
-	fmt.Println("you need to search")
-
+func GetDirs() string {
 	arr := []string{}
 	files, err := os.ReadDir("./snippets")
 	for _, obj := range files {
 		arr = append(arr, obj.Name())
 	}
-
 	data := strings.Join(arr, "\n")
 
 	// Create an io.Reader from the string
@@ -26,10 +23,15 @@ func OpenSnipFunc() {
 	selected, err := fzf(reader)
 	if err != nil {
 		fmt.Println("Error:", err)
-		return
 	}
 
-	fmt.Println("Selected item:", selected)
+	// file name of snippet example : Test.go
+	return selected
+
+}
+
+func OpenSnipFunc() {
+	selected := GetDirs()
 	openNvim(selected)
 	return
 
@@ -37,13 +39,13 @@ func OpenSnipFunc() {
 
 func openNvim(selected string) {
 
-    newFilePath := "./snippets/"+selected
+	newFilePath := "./snippets/" + selected
 	cmd := exec.Command("nvim", newFilePath)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-    err := cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		log.Printf("Error running command: %v", err)
 		return

@@ -25,26 +25,33 @@ func main() {
 	}
 
 	if len(os.Args) > 3 {
-		fmt.Println("too many args",len(os.Args))
+		fmt.Println("too many args", len(os.Args))
 		return
 	}
 
 	// flag parsing
-	openSnipName := ""
 	createSnipName := ""
-	runSnipName := ""
 
-	flag.StringVar(&runSnipName, "run", "", "search through all snippets and run selected one")
+	boolRun := flag.Bool("run", false, "search through all snippets and run selected one")
 	flag.StringVar(&createSnipName, "create", "", "create a snippet by providing its name")
-	flag.StringVar(&openSnipName, "open", "", "search through all snipptets and open the selected one")
+	boolOpen := flag.Bool("open", false, "search through all snipptets and open the selected one")
 	flag.Parse()
 
-	if runSnipName != "" {
-		utils.RunSnipFunc(allsnipRef,funcMap,"Test2")
-        return
+	if *boolRun == true {
+		// The selected string will always have go suffix since that is the output of fzf
+		selected := utils.GetDirs()
+		selected = strings.ToLower(selected)
+
+		// remove .go suffix to check against funcMap
+		if strings.HasSuffix(selected, goSuffix) {
+			selected = strings.TrimSuffix(selected, goSuffix)
+		}
+
+		utils.RunSnipFunc(allsnipRef, funcMap, selected)
+		return
 	}
 
-	if openSnipName != "" {
+	if *boolOpen == true {
 		utils.OpenSnipFunc()
 		return
 	}
@@ -56,11 +63,15 @@ func main() {
 
 	if len(os.Args) == 1 {
 		fmt.Println("Welcome to gopherit \nProvide the name of the snippet you want to run as the argument during cmd call")
+		fmt.Println("Flags available  -> ")
+		fmt.Println("--run <no args>  : ", "search through all snippets using fzf and run selected one")
+		fmt.Println("--create         : ", "create a snippet by providing its name")
+		fmt.Println("--open <no args> : ", "search through all snippets using fzf and open selected one")
 		return
 	}
 
 	args := os.Args
 	snipToRun := strings.ToLower(args[1])
 
-    utils.RunSnipFunc(allsnipRef,funcMap,snipToRun)
+	utils.RunSnipFunc(allsnipRef, funcMap, snipToRun)
 }

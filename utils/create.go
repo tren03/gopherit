@@ -7,14 +7,28 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 var goSuffix = ".go"
 
 func CreateSnipFunc(createSnipName string) {
 
-	if !strings.HasSuffix(createSnipName, goSuffix) {
-		createSnipName += goSuffix // Add .go if not already present
+    if createSnipName == ""{
+        fmt.Println("invalid name")
+        return
+    }
+
+    finalSnipName := createSnipName 
+    if !unicode.IsUpper(rune(createSnipName[0])){
+        upperChar := unicode.ToUpper(rune(createSnipName[0]))
+        finalSnipName = ""
+        finalSnipName = string(upperChar) + createSnipName[1:]
+    }
+
+
+	if !strings.HasSuffix(finalSnipName, goSuffix) {
+		finalSnipName += goSuffix // Add .go if not already present
 	}
 
 	boilerplate := fmt.Sprintf(`package snippets
@@ -25,10 +39,10 @@ import "fmt"
 func (s Snip) %sMain() {
     fmt.Println("Welcome to your snippet!")
 }
-        `, strings.TrimSuffix(createSnipName, ".go"))
+        `, strings.TrimSuffix(finalSnipName, ".go"))
 
 	snippetsDir := "./snippets"
-	path := filepath.Join(snippetsDir, createSnipName)
+	path := filepath.Join(snippetsDir, finalSnipName)
 
 	newFilePath := filepath.FromSlash(path)
 	log.Println("PATH TO NEW FILE ", newFilePath)
@@ -53,7 +67,7 @@ func (s Snip) %sMain() {
 		}()
 
 		fmt.Printf("File created successfully at %s\n", newFilePath)
-		createSnipName += ".go"
+		finalSnipName += ".go"
 
 		cmd := exec.Command("nvim", newFilePath)
 		cmd.Stdin = os.Stdin
