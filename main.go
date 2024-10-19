@@ -3,14 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"reflect"
 	"strings"
 
 	"github.com/tren03/gopherit/snippets"
+	"github.com/tren03/gopherit/utils"
 )
 
 var goSuffix = ".go"
@@ -26,83 +24,54 @@ func main() {
 		funcMap[methodName] = i
 	}
 
-	str := ""
-	flag.StringVar(&str, "create", "", "create a snippet by providing its name")
-	flag.Parse()
-
-	if str != "" {
-		// prg not accepting names with .go suffix
-		if !strings.HasSuffix(str, goSuffix) {
-			str += goSuffix // Add .go if not already present
-		}
-
-		boilerplate := fmt.Sprintf(`package snippets
-
-import "fmt"
-
-// This is the dynamically generated function for your snippet
-func (s Snip) %sMain() {
-    fmt.Println("Welcome to your snippet!")
-}
-        `, strings.TrimSuffix(str, ".go"))
-
-		snippetsDir := "./snippets"
-		path := filepath.Join(snippetsDir, str)
-
-		newFilePath := filepath.FromSlash(path)
-		log.Println("PATH TO NEW FILE ", newFilePath)
-		if _, err := os.Stat(newFilePath); err == nil {
-			log.Println("Snippet already exists, please choose a different name")
-		} else if os.IsNotExist(err) {
-			file, err := os.Create(newFilePath)
-			if err != nil {
-				fmt.Println("error creating new file ", err)
-				return
-			}
-			_, err = file.WriteString(boilerplate)
-			if err != nil {
-				log.Println("err creating boilerplate ", err)
-			}
-			defer func() {
-				if err := file.Close(); err != nil {
-					panic(err)
-				}
-
-			}()
-			fmt.Printf("File created successfully at %s\n", newFilePath)
-			str += ".go"
-			cmd := exec.Command("nvim", newFilePath)
-			if err := cmd.Run(); err != nil {
-				// handle error
-				log.Printf("Error running command: %v", err)
-			}
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err = cmd.Run()
-			if err != nil {
-				fmt.Println("error executing editor command ", err)
-			}
-		} else {
-			log.Printf("Error checking file: %v\n", err)
-			return
-		}
+	if len(os.Args) > 3 {
+		fmt.Println("too many args", len(os.Args))
 		return
 	}
+
+	// flag parsing
+	createSnipName := ""
+
+	boolRun := flag.Bool("run", false, "search through all snippets and run selected one")
+	flag.StringVar(&createSnipName, "create", "", "create a snippet by providing its name")
+	boolOpen := flag.Bool("open", false, "search through all snipptets and open the selected one")
+	flag.Parse()
+
+	if *boolRun == true {
+		// The selected string will always have go suffix since that is the output of fzf
+		selected := utils.GetDirs()
+		selected = strings.ToLower(selected)
+
+		// remove .go suffix to check against funcMap
+		if strings.HasSuffix(selected, goSuffix) {
+			selected = strings.TrimSuffix(selected, goSuffix)
+		}
+
+		utils.RunSnipFunc(allsnipRef, funcMap, selected)
+		return
+	}
+
+	if *boolOpen == true {
+		utils.OpenSnipFunc()
+		return
+	}
+
+	if createSnipName != "" {
+		utils.CreateSnipFunc(createSnipName)
+		return
+	}
+
 	if len(os.Args) == 1 {
 		fmt.Println("Welcome to gopherit \nProvide the name of the snippet you want to run as the argument during cmd call")
+		fmt.Println("Flags available  -> ")
+		fmt.Println("--run <no args>  : ", "search through all snippets using fzf and run selected one")
+		fmt.Println("--create         : ", "create a snippet by providing its name")
+		fmt.Println("--open <no args> : ", "search through all snippets using fzf and open selected one")
 		return
 	}
 
 	args := os.Args
 	snipToRun := strings.ToLower(args[1])
 
-	fIndex, ok := funcMap[snipToRun]
-	if !ok {
-		fmt.Println("snippet not present")
-		return
-	}
-
-	fmt.Printf("running snippet : %s\n", snipToRun)
-	allsnipRef.Method(fIndex).Call(nil)
+	utils.RunSnipFunc(allsnipRef, funcMap, snipToRun)
 }
