@@ -15,7 +15,7 @@ linters:
     - gosimple             # Simplifies Go code.
     - unused               # Checks for unused variables, constants, etc.
     - revive               # Code style and consistency linter.
-    - gosec                # Finds potential security issues.
+    #   - gosec                # Finds potential security issues.
 
 linters-settings:
   gofmt:

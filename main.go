@@ -63,10 +63,19 @@ func (s Snip) %sMain() {
 			if err != nil {
 				log.Println("err creating boilerplate ", err)
 			}
-			defer file.Close()
+			defer func() {
+				if err := file.Close(); err != nil {
+					panic(err)
+				}
+
+			}()
 			fmt.Printf("File created successfully at %s\n", newFilePath)
 			str += ".go"
 			cmd := exec.Command("nvim", newFilePath)
+			if err := cmd.Run(); err != nil {
+				// handle error
+				log.Printf("Error running command: %v", err)
+			}
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
